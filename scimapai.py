@@ -30,11 +30,6 @@ def get_text():
     input_text = st.text_area(label="Text Input", label_visibility='collapsed',
                               placeholder="Paste a scientific text...", key="text_input",
                               height=300)
-    # if not input_text:
-    #     with open('abstract_bacteria.txt', 'r') as file:
-    #         example = file.read().strip()
-    #     return example
-
     return(input_text)
 
 
@@ -163,7 +158,6 @@ components.html(source_code, height=550,width=1350)
 # with col1:
 st.markdown("**Summary:**")
 st.markdown(summary)
-
 
 
 if debug:
