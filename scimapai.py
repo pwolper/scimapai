@@ -23,7 +23,7 @@ def get_text():
                               height=300)
     return(input_text)
 
-@st.cache_data
+@st.cache_data(experimental_allow_widgets=True)
 def get_api_key():
     if not os.getenv("OPENAI_API_KEY"):
         openai_api_key=st.text_input(label="OpenAI API Key ",  placeholder="Ex: sk-2twmA8tfCb8un4...", key="openai_api_key_input")
