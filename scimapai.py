@@ -23,16 +23,20 @@ def get_text():
                               height=300)
     return(input_text)
 
-@st.cache_data(experimental_allow_widgets=True)
 def get_api_key():
-    if not os.getenv("OPENAI_API_KEY"):
-        openai_api_key=st.text_input(label="OpenAI API Key ",  placeholder="Ex: sk-2twmA8tfCb8un4...", key="openai_api_key_input")
-    else:
-        openai_api_key=os.getenv("OPENAI_API_KEY")
-    return(openai_api_key)
+    if "openai_api_key" not in st.session_state:
+        if not os.getenv("OPENAI_API_KEY"):
+            openai_input_field=st.empty()
+            openai_input_field.text_input(label="OpenAI API Key ",  placeholder="Ex: sk-2twmA8tfCb8un4...", key="openai_api_key")
+            # if st.session_state.openai_api_key != "":
+            #     openai_input_field.empty()
+            #     st.toast("API key saved...")
+        else:
+            st.session_state.openai_api_key=os.getenv("OPENAI_API_KEY")
+            return
 
 @st.cache_data(show_spinner="Generating concept map from text...")
-def llm_network_call(text_input):
+def llm_network_call(text_input, openai_api_key):
     llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0, openai_api_key=openai_api_key)
 
     mapping_template = """
@@ -58,8 +62,8 @@ def llm_network_call(text_input):
     return(output)
 
 @st.cache_data(show_spinner="Summarizing the text...")
-def llm_summary_call(text_input):
-    llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
+def llm_summary_call(text_input, openai_api_key):
+    llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5, openai_api_key=openai_api_key)
 
     summary_template = """
     You are an scientific assistant, tasked with summarizing a scientific text. When summarizing make sure to mention, the research aims, methods and results.
@@ -128,7 +132,7 @@ st.write("Exploring scientific texts and concepts through interactive knowledge 
 st.sidebar.markdown("**Description**")
 st.sidebar.markdown("SciMapAI uses OpenAIs GPT-4 model, to extract concepts and their relationships from scientific texts. It aims to provide a visual way of understanding complex texts, by leveraging knowlegde graphs.")
 st.sidebar.markdown("**Usage**")
-st.sidebar.markdown("Paste any scientific text you wish to extract a map of concepts from into the text box. You can then browse the resulting graph of concepts, by dragging and clicking on nodes and edges.")
+st.sidebar.markdown("After pasting your OpenAI API key, paste any scientific text you wish to extract a map of concepts from into the text box. Alternative ask for explanation of a topic. You can then browse the resulting graph of concepts, by dragging and clicking on nodes and edges.")
 st.sidebar.markdown("**Contact**")
 st.sidebar.markdown("Created by Philip Wolper [phi.wolper@gmail.com](phi.wolper@gmail.com). Code is available on [GitHub](https://github.com/pwolper/scimapai.git) here. Feeback is very welcome.")
 st.sidebar.markdown("**Knowledge Graph Options**")
@@ -136,14 +140,18 @@ debug=st.sidebar.checkbox("Show debugging information")
 
 text_input = get_text()
 
-openai_api_key = get_api_key()
+get_api_key()
+
+openai_api_key = st.session_state.openai_api_key
+
+#st.session_state
 
 if text_input:
-    if not openai_api_key:
+    if "openai_api_key" not in st.session_state:
         st.warning('Please insert OpenAI API Key. Instructions [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key)', icon="⚠️")
-        st.stop()
-    mapping_output = llm_network_call(text_input)
-    summary = llm_summary_call(text_input)
+        st.rerun()
+    mapping_output = llm_network_call(text_input, openai_api_key)
+    summary = llm_summary_call(text_input, openai_api_key)
 else:
     st.stop()
 
