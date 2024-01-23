@@ -138,11 +138,10 @@ st.sidebar.markdown("Created by Philip Wolper [phi.wolper@gmail.com](phi.wolper@
 st.sidebar.markdown("**Knowledge Graph Options**")
 debug=st.sidebar.checkbox("Show debugging information")
 
-text_input = get_text()
-
 get_api_key()
-
 openai_api_key = st.session_state.openai_api_key
+
+text_input = get_text()
 
 #st.session_state
 
