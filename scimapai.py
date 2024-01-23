@@ -31,7 +31,7 @@ def get_api_key():
         openai_api_key=os.getenv("OPENAI_API_KEY")
     return(openai_api_key)
 
-@st.cache_data
+@st.cache_data(show_spinner="Generating concept map from text...")
 def llm_network_call(text_input):
     llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0, openai_api_key=openai_api_key)
 
@@ -57,7 +57,7 @@ def llm_network_call(text_input):
     output = answer.content
     return(output)
 
-@st.cache_data
+@st.cache_data(show_spinner="Summarizing the text...")
 def llm_summary_call(text_input):
     llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
 
