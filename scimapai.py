@@ -128,7 +128,7 @@ st.write("Exploring scientific texts and concepts through interactive knowledge 
 st.sidebar.markdown("**Description**")
 st.sidebar.markdown("SciMapAI uses OpenAIs GPT-4 model, to extract concepts and their relationships from scientific texts. It aims to provide a visual way of understanding complex texts, by leveraging knowlegde graphs.")
 st.sidebar.markdown("**Usage**")
-st.sidebar.markdown("Paste any scientific text you wosh to extract a map of concepts from into the text box. You can then browse the resulting graph of concepts, by dragging and clicking on nodes and edges.")
+st.sidebar.markdown("Paste any scientific text you wish to extract a map of concepts from into the text box. You can then browse the resulting graph of concepts, by dragging and clicking on nodes and edges.")
 st.sidebar.markdown("**Contact**")
 st.sidebar.markdown("Created by Philip Wolper [phi.wolper@gmail.com](phi.wolper@gmail.com). Code is available on [GitHub](https://github.com/pwolper/scimapai.git) here. Feeback is very welcome.")
 st.sidebar.markdown("**Knowledge Graph Options**")
