@@ -18,6 +18,6 @@ You will be prompted to input your OpenAI API key, which will be cached as long 
 
 * Future Ideas
 - Add description tooltips for nodes as well.
-- set up hosting (streamlit community cloud or other options)
+- add downloadable html graph button
 - Generate knowledge graphs in as outline of running chat conversation. Include RAG chat on science papers.
 - Improve the graph generation prompting to make more cohesive/less fragmented graphs. (eg. https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a)
