@@ -163,21 +163,19 @@ if "text_input" in st.session_state:
         download=st.download_button("Download HTML", data=source_code, file_name="knowledge_graph.html")
         debug=st.sidebar.checkbox("Show debugging information")
 
+        if debug:
+            with st.expander("**LLM output and Data Structure**"):
+                st.markdown("**LLM output:**")
+                st.markdown(mapping_output)
+                st.markdown("**Nodes:**")
+                st.write(nodes)
+                st.markdown("**Edges:**")
+                st.write(edges)
         st.markdown("**Summary:**")
         summary = llm_summary_call(st.session_state.text_input, st.session_state.openai_api_key)
         st.markdown(summary)
     else:
         st.stop()
 
-debug=False
-
-if debug:
-    with st.expander("**LLM output and Data Structure**"):
-        st.markdown("**LLM output:**")
-        st.markdown(mapping_output)
-        st.markdown("**Nodes:**")
-        st.write(nodes)
-        st.markdown("**Edges:**")
-        st.write(edges)
 else:
     st.stop()
