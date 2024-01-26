@@ -169,6 +169,8 @@ if "text_input" in st.session_state:
     else:
         st.stop()
 
+debug=False
+
 if debug:
     with st.expander("**LLM output and Data Structure**"):
         st.markdown("**LLM output:**")
@@ -177,3 +179,5 @@ if debug:
         st.write(nodes)
         st.markdown("**Edges:**")
         st.write(edges)
+else:
+    st.stop()
