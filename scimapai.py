@@ -24,7 +24,10 @@ def get_text():
                               placeholder="Paste a scientific text...", key="text_input",
                               height=300)
         if st.session_state.text_input != "":
-            text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
+                text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
+                if st.button("New Input"):
+                    del st.session_state.text_input
+                    st.rerun()
     return
 
 def get_api_key():
@@ -157,9 +160,9 @@ if "text_input" in st.session_state:
         nodes, edges = json_parsing(mapping_output)
         source_code=pyvis_graph(nodes, edges)
         st.markdown("**Knowledge Graph:**")
-        download=st.download_button("Download HTML", data=source_code, file_name="knowledge_graph.html")
         components.html(source_code, height=550,width=1350)
-        # Summary of Text
+        download=st.download_button("Download HTML", data=source_code, file_name="knowledge_graph.html")
+
         st.markdown("**Summary:**")
         summary = llm_summary_call(st.session_state.text_input, st.session_state.openai_api_key)
         st.markdown(summary)
