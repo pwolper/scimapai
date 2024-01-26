@@ -147,6 +147,7 @@ st.sidebar.markdown("After pasting your OpenAI API key, paste any scientific tex
 st.sidebar.markdown("**Contact**")
 st.sidebar.markdown("Created by Philip Wolper [phi.wolper@gmail.com](phi.wolper@gmail.com). Code is available on [GitHub](https://github.com/pwolper/scimapai.git) here. Feeback is very welcome.")
 st.sidebar.markdown("**Knowledge Graph Options**")
+debug=st.sidebar.checkbox("Show debugging information")
 
 get_api_key()
 get_text()
@@ -161,21 +162,18 @@ if "text_input" in st.session_state:
         st.markdown("**Knowledge Graph:**")
         components.html(source_code, height=550,width=1350)
         download=st.download_button("Download HTML", data=source_code, file_name="knowledge_graph.html")
-        debug=st.sidebar.checkbox("Show debugging information")
 
-        if debug:
-            with st.expander("**LLM output and Data Structure**"):
-                st.markdown("**LLM output:**")
-                st.markdown(mapping_output)
-                st.markdown("**Nodes:**")
-                st.write(nodes)
-                st.markdown("**Edges:**")
-                st.write(edges)
         st.markdown("**Summary:**")
         summary = llm_summary_call(st.session_state.text_input, st.session_state.openai_api_key)
         st.markdown(summary)
     else:
         st.stop()
 
-else:
-    st.stop()
+if debug:
+    with st.expander("**LLM output and Data Structure**"):
+        st.markdown("**LLM output:**")
+        st.markdown(mapping_output)
+        st.markdown("**Nodes:**")
+        st.write(nodes)
+        st.markdown("**Edges:**")
+        st.write(edges)
