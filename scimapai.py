@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys
+import os, sys, time
 import json
 from typing import List
 import streamlit as st
@@ -18,19 +18,27 @@ from langchain.schema import BaseOutputParser
 ### Functions ###
 
 def get_text():
-    input_text = st.text_area(label="Text Input", label_visibility='collapsed',
+    text_box=st.empty()
+    if "openai_api_key" in st.session_state:
+        text_box.text_area(label="Text Input", label_visibility='collapsed',
                               placeholder="Paste a scientific text...", key="text_input",
                               height=300)
-    return(input_text)
+        if st.session_state.text_input != "":
+            text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
+    return
 
 def get_api_key():
     if "openai_api_key" not in st.session_state:
         if not os.getenv("OPENAI_API_KEY"):
             openai_input_field=st.empty()
-            openai_input_field.text_input(label="OpenAI API Key ",  placeholder="Ex: sk-2twmA8tfCb8un4...", key="openai_api_key")
-            # if st.session_state.openai_api_key != "":
-            #     openai_input_field.empty()
-            #     st.toast("API key saved...")
+            openai_input_field.text_input(label="OpenAI API Key ",  placeholder="Ex: sk-2twmA8tfCb8un4...",
+                                          key="openai_api_key_input", type="password",
+                                          help="Please insert OpenAI API Key. Instructions [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key)")
+            if st.session_state.openai_api_key_input != "":
+                st.session_state.openai_api_key=st.session_state.openai_api_key_input
+                openai_input_field.success("API key saved...")
+                time.sleep(.5)
+                openai_input_field.empty()
         else:
             st.session_state.openai_api_key=os.getenv("OPENAI_API_KEY")
             return
@@ -139,36 +147,24 @@ st.sidebar.markdown("**Knowledge Graph Options**")
 debug=st.sidebar.checkbox("Show debugging information")
 
 get_api_key()
-openai_api_key = st.session_state.openai_api_key
-
-text_input = get_text()
+get_text()
 
 #st.session_state
 
-if text_input:
-    if "openai_api_key" not in st.session_state:
-        st.warning('Please insert OpenAI API Key. Instructions [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key)', icon="⚠️")
-        st.rerun()
-    mapping_output = llm_network_call(text_input, openai_api_key)
-    summary = llm_summary_call(text_input, openai_api_key)
-else:
-    st.stop()
-
-nodes, edges = json_parsing(mapping_output)
-
-source_code=pyvis_graph(nodes, edges)
-
-# col1, col2 = st.columns(2)
-
-# with col2:
-    # components.html(source_code, height=450,width=650)
-st.markdown("**Knowledge Graph:**")
-components.html(source_code, height=550,width=1350)
-
-# with col1:
-st.markdown("**Summary:**")
-st.markdown(summary)
-
+if "text_input" in st.session_state:
+    if st.session_state.text_input != "":
+        mapping_output = llm_network_call(st.session_state.text_input, st.session_state.openai_api_key)
+        nodes, edges = json_parsing(mapping_output)
+        source_code=pyvis_graph(nodes, edges)
+        st.markdown("**Knowledge Graph:**")
+        download=st.download_button("Download HTML", data=source_code, file_name="knowledge_graph.html")
+        components.html(source_code, height=550,width=1350)
+        # Summary of Text
+        st.markdown("**Summary:**")
+        summary = llm_summary_call(st.session_state.text_input, st.session_state.openai_api_key)
+        st.markdown(summary)
+    else:
+        st.stop()
 
 if debug:
     with st.expander("**LLM output and Data Structure**"):
