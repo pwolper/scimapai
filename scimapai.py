@@ -22,7 +22,7 @@ def get_text():
     if "openai_api_key" in st.session_state:
         text_box.text_area(label="Text Input", label_visibility='collapsed',
                               placeholder="Paste a scientific text...", key="text_input",
-                              height=300)
+                              height=200)
         if st.session_state.text_input != "":
                 text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
                 if st.button("New Input"):
