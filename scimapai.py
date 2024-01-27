@@ -19,15 +19,19 @@ from langchain.schema import BaseOutputParser
 
 def get_text():
     text_box=st.empty()
-    if "openai_api_key" in st.session_state:
-        text_box.text_area(label="Text Input", label_visibility='collapsed',
-                              placeholder="Paste a scientific text...", key="text_input",
-                              height=200)
-        if st.session_state.text_input != "":
-                text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
-                if st.button("New Input"):
-                    del st.session_state.text_input
-                    st.rerun()
+    text_box.text_area(label="Text Input",
+                       # label_visibility='collapsed',
+                       placeholder="Paste a scientific text...", key="text_input",
+                       height=200)
+    if st.session_state.text_input != "":
+        if st.button("New Input"):
+            del st.session_state.text_input
+            st.rerun()
+        text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
+    return
+
+def upload_pdf():
+    pdf = st.file_uploader("PDF upload")
     return
 
 def get_api_key():
@@ -45,6 +49,16 @@ def get_api_key():
         else:
             st.session_state.openai_api_key=os.getenv("OPENAI_API_KEY")
             return
+
+def main_menu():
+    option = st.selectbox("What you  you like to do?", options=("Input a text", "Upload a PDF file", "Chat with the AI"),
+                          index=None, placeholder="Select an option...")
+    if option == "Input a text":
+        get_text()
+    if option == "Upload a PDF file":
+        upload_pdf()
+    return
+
 
 @st.cache_data(show_spinner="Generating concept map from text...")
 def llm_network_call(text_input, openai_api_key):
@@ -150,9 +164,11 @@ st.sidebar.markdown("**Knowledge Graph Options**")
 debug=st.sidebar.checkbox("Show debugging information")
 
 get_api_key()
-get_text()
 
-#st.session_state
+if "openai_api_key" in st.session_state:
+    main_menu()
+
+
 
 if "text_input" in st.session_state:
     if st.session_state.text_input != "":
