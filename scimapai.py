@@ -8,12 +8,18 @@ from streamlit_agraph import agraph, Node, Edge, Config
 import streamlit.components.v1 as components
 from pyvis.network import Network
 from pyvis import network as net
+from PyPDF2 import PdfReader
 
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 from langchain.schema import BaseOutputParser
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.chains.summarize import load_summarize_chain
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_community.vectorstores import faiss
+
 
 ### Functions ###
 
@@ -30,9 +36,31 @@ def get_text():
         text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
     return
 
-def upload_pdf():
+def get_pdf():
     pdf = st.file_uploader("PDF upload")
-    return
+    if pdf is not None:
+        pdf = PdfReader(pdf)
+        text = " ".join(page.extract_text() for page in pdf.pages)
+
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=200,
+            chunk_overlap=50,
+            length_function=len
+        )
+
+        chunks = text_splitter.create_documents([text])
+
+        st.success("The file has been split into " + str(len(chunks)) + " chunks.")
+        return(chunks)
+    else:
+        return(pdf==None)
+
+
+#@st.cache_data(show_spinner="Generating vectorstore from embeddings and text...")
+def create_vectorstore(chunks):
+        embeddings = OpenAIEmbeddings()
+        vectorstore = faiss.FAISS.from_documents(chunks, embeddings)
+        return(vectorstore)
 
 def get_api_key():
     if "openai_api_key" not in st.session_state:
@@ -56,7 +84,26 @@ def main_menu():
     if option == "Input a text":
         get_text()
     if option == "Upload a PDF file":
-        upload_pdf()
+        chunks = get_pdf()
+
+        if chunks is not None:
+            summary = summary_chain(chunks, st.session_state.openai_api_key)
+            summary_text = summary["output_text"]
+
+
+            st.markdown("**Summary:**")
+            st.write(summary_text)
+
+            mapping_output = llm_network_call(summary_text, st.session_state.openai_api_key)
+            nodes, edges = json_parsing(mapping_output)
+            source_code=pyvis_graph(nodes, edges)
+            st.markdown("**Knowledge Graph:**")
+            components.html(source_code, height=550,width=1350)
+            download=st.download_button("Download HTML", data=source_code, file_name="knowledge_graph.html")
+
+        #vectorstore = create_vectorstore(chunks)
+
+        #st.write(chunks)
     return
 
 
@@ -105,6 +152,15 @@ def llm_summary_call(text_input, openai_api_key):
     answer = llm(summary_message)
     output = answer.content
     return(output)
+
+#@st.cache_data(show_spinner="Summarizing the document...")
+def summary_chain(chunks, openai_api_key):
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.5, openai_api_key=openai_api_key)
+    chain = load_summarize_chain(llm=llm, chain_type="refine")
+
+    summarization = chain.invoke(chunks)
+    return(summarization)
+
 
 def json_parsing(mapping_output):
     output_dict = json.loads(mapping_output)
@@ -167,8 +223,6 @@ get_api_key()
 
 if "openai_api_key" in st.session_state:
     main_menu()
-
-
 
 if "text_input" in st.session_state:
     if st.session_state.text_input != "":
