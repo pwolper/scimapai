@@ -16,6 +16,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 from langchain.schema import BaseOutputParser
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.chains.summarize import load_summarize_chain
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_community.vectorstores import faiss
@@ -35,6 +36,7 @@ def get_text():
             st.rerun()
         text_box.info(str("Prompt: \"" +st.session_state.text_input+"\""))
     return
+
 
 def get_pdf():
     pdf = st.file_uploader("PDF upload")
@@ -155,9 +157,8 @@ def llm_summary_call(text_input, openai_api_key):
 
 #@st.cache_data(show_spinner="Summarizing the document...")
 def summary_chain(chunks, openai_api_key):
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.5, openai_api_key=openai_api_key)
-    chain = load_summarize_chain(llm=llm, chain_type="refine")
-
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106", temperature=0.5, openai_api_key=openai_api_key)
+    chain = load_summarize_chain(llm=llm, chain_type="stuff")
     summarization = chain.invoke(chunks)
     return(summarization)
 
